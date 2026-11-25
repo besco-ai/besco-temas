@@ -1,6 +1,6 @@
 # Besco Temas (pixel-temas)
 
-Temas em pixel art para o fundo da janela do Claude Desktop, feitos pela Besco. São cenas estáticas e animadas, um tema com o logo da Besco pulsando no céu e temas de zoeira em que a foto de alguém quica pela tela, cai do céu ou vira "funcionário do mês".
+Temas animados para o fundo da janela do Claude Desktop, feitos pela Besco. São 30 temas com o logo da Besco pulsando, em vários estilos, mais cenas em pixel art e temas de zoeira em que a foto de alguém quica pela tela, cai do céu ou vira "funcionário do mês".
 
 ![Besco no Lago](previas/besco.png)
 
@@ -56,11 +56,47 @@ Digite na caixa de mensagem do Claude Desktop:
 
 O tema escolhido vale para todas as sessões até você trocar. Ele aparece a partir da próxima mensagem que você mandar.
 
-## Temas
+## Pack Besco: 30 temas animados
+
+Todos com o logo da Besco pulsando, em estilos diferentes: vetor, neon, gradiente, linha, papel, holograma e pixel art. Para ver todos animados, abra [`previas/galeria.html`](previas/galeria.html) no navegador.
+
+| Comando | Tema | Janela |
+| --- | --- | --- |
+| `/pixel besco` | Lago à noite com o logo no céu e refletido na água (pixel) | escura |
+| `/pixel besco-pixel-cidade` | Cidade com um outdoor da Besco (pixel) | escura |
+| `/pixel besco-aurora` | Aurora boreal sobre colinas de neve | escura |
+| `/pixel besco-galaxia` | Galáxia em espiral girando | escura |
+| `/pixel besco-orbita` | Planetas em órbita do logo | escura |
+| `/pixel besco-foguete` | Foguete dando voltas no planeta Besco | escura |
+| `/pixel besco-constelacao` | O logo desenhado com estrelas | escura |
+| `/pixel besco-neon` | Letreiro de neon rosa numa parede de tijolos | escura |
+| `/pixel besco-synthwave` | Pôr do sol neon com grade correndo | escura |
+| `/pixel besco-vaporwave` | Vaporwave rosa e ciano, logo tremendo em cores | escura |
+| `/pixel besco-codigo` | Chuva de blocos de código | escura |
+| `/pixel besco-terminal` | Terminal com código sendo digitado | escura |
+| `/pixel besco-holograma` | Holograma saindo de um projetor | escura |
+| `/pixel besco-som` | Equalizador de música | escura |
+| `/pixel besco-radar` | Radar girando | escura |
+| `/pixel besco-planta` | Planta técnica com o logo sendo desenhado | escura |
+| `/pixel besco-contorno` | O logo se desenhando em linha neon | escura |
+| `/pixel besco-chuva-neon` | Cidade na chuva com reflexo no chão | escura |
+| `/pixel besco-ondulacao` | Ondas circulares num lago escuro | escura |
+| `/pixel besco-por-do-sol` | Montanhas em camadas no pôr do sol | escura |
+| `/pixel besco-gradiente` | Manchas de cor escura se movendo | escura |
+| `/pixel besco-lava` | Lâmpada de lava | escura |
+| `/pixel besco-minimal-escuro` | Fundo preto com anéis saindo do logo | escura |
+| `/pixel besco-oceano` | Mar em camadas ao amanhecer | clara |
+| `/pixel besco-nuvens` | Céu com nuvens e balões | clara |
+| `/pixel besco-bolhas` | Manchas pastel se movendo | clara |
+| `/pixel besco-confete` | Confete caindo | clara |
+| `/pixel besco-papel` | Papel recortado em camadas | clara |
+| `/pixel besco-isometrico` | Cubos isométricos flutuando | clara |
+| `/pixel besco-minimal-claro` | Fundo claro minimalista | clara |
+
+## Outros temas
 
 | Nome | Tipo | Janela | O que tem |
 | --- | --- | --- | --- |
-| `besco` | animado | escura | Lago à noite com o logo da Besco pulsando no céu, reflexo na água, vaga-lumes e uma cabana |
 | `cidade` | animado | escura | Cidade de noite com janelas acendendo, estrelas piscando e um trem cruzando a ponte |
 | `praia` | animado | clara | Ondas, barco balançando, nuvens andando e gaivotas |
 | `chuva` | animado | escura | Quarto lo-fi com chuva na janela, gato dormindo e café soltando vapor |
@@ -143,6 +179,8 @@ Só suba fotos de pessoas para o repositório com a autorização delas.
 O fundo da janela do Claude Desktop só aceita desenho vetorial (SVG). PNG, GIF e foto não entram direto. Por isso o gerador desenha cada cena numa grade de 192 por 108 pixels e transforma cada pixel em vetor. As animações guardam só o que muda de um quadro para o outro, para cada cena caber no limite de 131 mil caracteres do app.
 
 - `ferramentas/pixel.py`: a tela de pixels, a fonte em pixel, a conversão de foto e GIF e a exportação para SVG.
-- `ferramentas/gerar.py`: as cenas e o gerador, que escreve `hooks/cenas.ts` e as prévias.
+- `ferramentas/gerar.py`: as cenas em pixel e o gerador, que escreve `hooks/cenas.ts` e as prévias.
+- `ferramentas/besco_pack.py`: os temas da Besco em vetor, feitos com o logo de `ferramentas/besco-logo.json`.
+- `ferramentas/galeria.py`: monta `previas/galeria.html` com todos os temas da Besco animados.
 - `hooks/register.tsx`: o plugin. Registra o comando `/pixel`, guarda a escolha e desenha a cena no fundo.
 - `tests/`: testes do comando, rodados com `claude plugin test .`.

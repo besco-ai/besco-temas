@@ -1,6 +1,6 @@
 {
   "name": "pixel-temas",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Temas em pixel art para o fundo da janela do Claude Desktop: estáticos, animados e de zoeira com fotos. /pixel lista, /pixel <nome> aplica, /pixel off tira.",
   "author": {
     "name": "Besco"

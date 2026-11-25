@@ -20,6 +20,7 @@ from PIL import Image
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
+import besco_pack  # noqa: E402
 from pixel import (BAYER, Cena, Tela, checar_svg, foto_para_sprite, gif_para_quadros, largura_texto, mistura, rgb,  # noqa: E402
                    ruido)
 
@@ -551,6 +552,43 @@ def cena_besco():
     return c
 
 
+def cena_cidade_besco():
+    """A cidade à noite com um outdoor da Besco no alto dos prédios, o logo pulsando."""
+    cena = cena_cidade()
+    logo = mascara_logo(50)
+    lh, lw = logo.shape
+    ox, oy = 104, 34
+    pw, ph = lw + 8, lh + 8
+
+    def outdoor(t, forca):
+        for px in (ox + 8, ox + pw - 10):
+            t.ret(px, oy + ph, 2, 18, '#2a3150')
+        t.ret(ox - 1 - forca, oy - 1 - forca, pw + 2 + 2 * forca, ph + 2 + 2 * forca, '#2c2a6a' if forca else '#1a2040')
+        t.ret(ox - 1, oy - 1, pw + 2, ph + 2, '#3a4070')
+        t.ret(ox, oy, pw, ph, '#0b0d26')
+        cor = mistura(LAVANDA, '#ffffff', 0.18 * forca)
+        for j in range(lh):
+            for i in range(lw):
+                if logo[j, i]:
+                    t.ponto(ox + 4 + i, oy + 4 + j, cor)
+        for i in range(0, pw, 6):
+            t.ponto(ox + i, oy + ph, '#ffe08a')
+
+    vistas = {id(cena.base): cena.base}
+    for telas, _, _ in cena.animacoes:
+        for t in telas:
+            vistas[id(t)] = t
+    for t in vistas.values():
+        outdoor(t, 0)
+    quadros = []
+    for forca in (0, 1, 2, 1):
+        f = cena.base.copia()
+        outdoor(f, forca)
+        quadros.append(f)
+    cena.animar(quadros, [0.9, 0.6, 0.9, 0.6])
+    return cena
+
+
 # ---------------------------------------------------------------- zoeira
 
 def carinha(lado=32):
@@ -723,7 +761,7 @@ def main():
         cena_praia(), claro('#f4ead2'))
     add('chuva', 'Chuva Lo-fi', 'dark', 'animado', 'Quarto em pixel art com chuva na janela e um gato dormindo',
         cena_chuva(), escuro('#1c1830'))
-    add('besco', 'Besco no Lago', 'dark', 'animado',
+    add('besco', 'Besco no Lago', 'dark', 'besco',
         'Lago à noite em pixel art com o logo da Besco pulsando no céu e refletido na água',
         cena_besco(), escuro('#120e30'))
 
@@ -731,6 +769,17 @@ def main():
     pessoas = json.loads(config.read_text()) if config.exists() else []
     if not pessoas:
         pessoas = [{'nome': 'Carinha', 'id': '', 'foto': None}]
+    add('besco-pixel-cidade', 'Besco Pixel Cidade', 'dark', 'besco',
+        'Cidade em pixel art à noite com um outdoor da Besco pulsando', cena_cidade_besco(), escuro('#0c1330'))
+    print('Pack Besco em vetor:')
+    for t in besco_pack.todos():
+        tamanho = checar_svg(t['svg'], t['id'])
+        (RAIZ / 'previas' / 'svg').mkdir(parents=True, exist_ok=True)
+        (RAIZ / 'previas' / 'svg' / f"{t['id']}.svg").write_text(t['svg'])
+        vidro = (escuro if t['janela'] == 'dark' else claro)(t['tinta'])
+        temas.append({'id': t['id'], 'titulo': t['titulo'], 'janela': t['janela'], 'tipo': 'besco', 'alt': t['alt'],
+                      'svg': t['svg'], 'vidro': vidro})
+        print(f"  {t['id']:28s} {tamanho:7d} caracteres")
     print('Zoeira:')
     for p in pessoas:
         sufixo = f'-{p["id"]}' if p.get('id') else ''
@@ -758,16 +807,31 @@ def main():
         add(ident, g.stem, 'dark', 'gif', f'GIF {g.stem} em pixel art', cena, escuro('#111111'))
         print(f'    ({info})')
 
-    linhas = ['// Gerado por ferramentas/gerar.py. Não edite à mão: rode o gerador de novo.', '',
-              "export type Vidro = { blur: number; tint: string; opacity: number } | false",
-              "export type Cena = { id: string; titulo: string; janela: 'light' | 'dark'; "
-              "tipo: 'estatico' | 'animado' | 'zoeira' | 'gif'; alt: string; svg: string; vidro: Vidro }", '',
-              'export const CENAS: Cena[] = [']
-    for tm in temas:
-        linhas.append('  ' + json.dumps(tm, ensure_ascii=False) + ',')
-    linhas.append(']')
-    (RAIZ / 'hooks' / 'cenas.ts').write_text('\n'.join(linhas) + '\n')
-    print(f'{len(temas)} temas em hooks/cenas.ts')
+    # Um arquivo por tema: o Claude Code não lê arquivo de mais de 1 MB, e o pack inteiro passa disso.
+    pasta = RAIZ / 'hooks' / 'cenas'
+    pasta.mkdir(exist_ok=True)
+    for velho in pasta.glob('*.ts'):
+        velho.unlink()
+    aviso = '// Gerado por ferramentas/gerar.py. Não edite à mão: rode o gerador de novo.'
+    (pasta / 'tipo.ts').write_text(
+        aviso + '\n\nexport type Vidro = { blur: number; tint: string; opacity: number } | false\n'
+        "export type Cena = { id: string; titulo: string; janela: 'light' | 'dark'; "
+        "tipo: 'besco' | 'estatico' | 'animado' | 'zoeira' | 'gif'; alt: string; svg: string; vidro: Vidro }\n")
+    nomes = []
+    for k, tm in enumerate(temas):
+        nome = f't{k:02d}'
+        nomes.append(nome)
+        (pasta / f'{nome}.ts').write_text(f"{aviso}\n\nimport type {{ Cena }} from './tipo'\n\n"
+                                         f"export const cena: Cena = {json.dumps(tm, ensure_ascii=False)}\n")
+    indice = [aviso, '', "import type { Cena } from './tipo'"]
+    indice += [f"import {{ cena as {n} }} from './{n}'" for n in nomes]
+    indice += ['', "export type { Cena, Vidro } from './tipo'", '', f"export const CENAS: Cena[] = [{', '.join(nomes)}]"]
+    (pasta / 'index.ts').write_text('\n'.join(indice) + '\n')
+    velho = RAIZ / 'hooks' / 'cenas.ts'
+    if velho.exists():
+        velho.unlink()
+    maior = max(f.stat().st_size for f in pasta.glob('*.ts'))
+    print(f'{len(temas)} temas em hooks/cenas/ (maior arquivo: {maior // 1024} KB)')
 
 
 if __name__ == '__main__':

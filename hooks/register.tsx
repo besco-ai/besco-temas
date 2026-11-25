@@ -1,13 +1,14 @@
 import type { EngineInterface, Register } from 'claude-code'
 
-import { CENAS } from './cenas'
-import type { Cena } from './cenas'
+import { CENAS } from './cenas/index'
+import type { Cena } from './cenas/index'
 
 const PLUGIN = 'pixel-temas'
 // O tema escolhido vale para todas as sessões, até alguém trocar ou tirar.
 const CHAVE = 'escolha'
 
 const TIPOS: Array<[Cena['tipo'], string]> = [
+  ['besco', 'Besco'],
   ['estatico', 'Estáticos'],
   ['animado', 'Animados'],
   ['zoeira', 'Zoeira'],

@@ -291,8 +291,12 @@ class Cena:
 
 
 def checar_svg(svg, nome):
-    proibidos = ['<image', 'data:', 'base64', 'foreignObject', '@import', '@font-face', '\\', 'url(']
+    import re
+    proibidos = ['<image', 'data:', 'base64', 'foreignObject', 'feImage', '@import', '@font-face', '\\', 'CDATA', '<!--']
     achados = [p for p in proibidos if p in svg]
+    achados += [u for u in re.findall(r'url[(][^)]*[)]', svg) if not u.startswith('url(#')]
+    achados += [h for h in re.findall(r'href="[^"]*"', svg) if not h.startswith('href="#')]
+    achados += [i for i in re.findall(r' id="([^"]*)"', svg) if '-' not in i]
     if achados:
         raise ValueError(f'{nome}: o SVG tem {achados}, que o app recusa')
     if len(svg) > LIMITE_SVG:
