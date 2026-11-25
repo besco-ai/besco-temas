@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import type { CommandRunInput, On } from 'claude-code'
+import type { CommandRunInput, On, TurnStartInput } from 'claude-code'
 
 /** A chamada do comando, do jeito que a pessoa digita `/pixel <args>`. */
 function pixel(args: string): CommandRunInput {
@@ -43,7 +43,7 @@ test('/pixel <nome> salva a escolha e põe a cena no fundo', async ($, on) => {
   const { temas, guardado } = mundo(on)
   const { text } = await $.command.run(pixel('Cidade à Noite'))
 
-  expect(text).toBe('Cidade à Noite aplicado (janela escura).')
+  expect(text).toContain('Cidade à Noite aplicado (janela escura).')
   expect(guardado.escolha).toBe('cidade')
   expect(JSON.stringify(temas)).toContain('"scene":"cidade"')
 
@@ -71,4 +71,19 @@ test('/pixel off apaga a escolha', async ($, on) => {
   await $.command.run(pixel('off'))
 
   expect(guardado.escolha).toBeUndefined()
+})
+
+test('uma troca feita em outra sessão chega aqui no próximo turno', async ($, on) => {
+  const { temas, guardado } = mundo(on)
+  on('turn.start', (_, e) => ({ turnId: e.turnId }))
+
+  await $.command.run(pixel('praia'))
+  guardado.escolha = 'cidade' // outra sessão escolheu a cidade
+  await $.turn.start({ text: 'oi', turnId: 't-1' } as TurnStartInput)
+
+  expect(JSON.stringify(temas.at(-1))).toContain('"scene":"cidade"')
+
+  const antes = temas.length
+  await $.turn.start({ text: 'oi de novo', turnId: 't-2' } as TurnStartInput)
+  expect(temas.length).toBe(antes) // sem mudança, não põe o tema de novo
 })

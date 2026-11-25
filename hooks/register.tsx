@@ -55,6 +55,31 @@ async function aplicar($: EngineInterface, cena: Cena): Promise<string | undefin
   return set.isDrawn ? undefined : set.reason
 }
 
+// O tema que esta sessão pôs por último. Cada sessão tem o seu; a escolha guardada é uma só para todas.
+let aplicado: string | undefined
+
+/**
+ * Põe nesta sessão o tema guardado, se ele mudou desde a última vez. Roda ao abrir a sessão e a cada
+ * turno, então uma troca feita em outra sessão chega aqui na próxima mensagem.
+ */
+async function sincronizar($: EngineInterface): Promise<void> {
+  const escolha = await $.store.get(CHAVE)
+  const cena = typeof escolha === 'string' ? achar(escolha) : undefined
+
+  if (cena?.id === aplicado) {
+    return
+  }
+
+  if (cena !== undefined) {
+    await aplicar($, cena)
+  } else if (aplicado !== undefined) {
+    // Só tira o tema que esta sessão mesma pôs, para não apagar o de outro plugin.
+    await $.theme.clear()
+  }
+
+  aplicado = cena?.id
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -62,13 +87,13 @@ export const register: Register = on => {
       description: 'Temas em pixel art: lista, aplica (/pixel <nome>) ou tira (/pixel off)',
       argumentHint: '[nome | aleatorio | off]',
     })
+    await sincronizar($)
 
-    const escolha = await $.store.get(CHAVE)
-    const cena = typeof escolha === 'string' ? achar(escolha) : undefined
+    return next(e)
+  })
 
-    if (cena !== undefined) {
-      await aplicar($, cena)
-    }
+  on('turn.start', async ($, e, next) => {
+    await sincronizar($)
 
     return next(e)
   })
@@ -83,8 +108,9 @@ export const register: Register = on => {
     if (pedido === 'off') {
       await $.store.delete(CHAVE)
       await $.theme.clear()
+      aplicado = undefined
 
-      return { text: 'Tema tirado.' }
+      return { text: 'Tema tirado em todas as sessões.' }
     }
 
     const cena =
@@ -98,13 +124,14 @@ export const register: Register = on => {
 
     await $.store.set(CHAVE, cena.id)
     const motivo = await aplicar($, cena)
+    aplicado = cena.id
     const janela = cena.janela === 'dark' ? 'janela escura' : 'janela clara'
 
     if (motivo !== undefined) {
       return { text: `${cena.titulo} salvo (${janela}), mas esta janela não desenhou: ${motivo}` }
     }
 
-    return { text: `${cena.titulo} aplicado (${janela}).` }
+    return { text: `${cena.titulo} aplicado (${janela}). As outras sessões trocam na próxima mensagem.` }
   })
 
   on('ui.render', { component: 'Backdrop' }, ($, e, next) => {
