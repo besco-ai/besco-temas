@@ -1,0 +1,13 @@
+{
+  "name": "besco-temas",
+  "owner": {
+    "name": "Besco"
+  },
+  "description": "Temas em pixel art da Besco para o fundo do Claude Desktop",
+  "plugins": [
+    {
+      "name": "pixel-temas",
+      "source": "./"
+    }
+  ]
+}
