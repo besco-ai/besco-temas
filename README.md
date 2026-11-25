@@ -8,18 +8,10 @@ Temas animados para o fundo da janela do Claude Desktop, feitos pela Besco. São
 
 1. **Claude Desktop** atualizado, no Mac ou no Windows. O tema aparece atrás da conversa na aba Code.
 2. **Claude Code**, que já vem junto com o Claude Desktop. Para instalar pelo terminal, o comando `claude` precisa estar disponível.
-3. **Acesso a este repositório.** Ele é privado: peça para alguém da Besco te convidar no GitHub e aceite o convite pelo e-mail ou em github.com.
-4. **O GitHub configurado no seu computador.** A instalação baixa o repositório sem pedir senha, então o computador já precisa estar logado no GitHub. O jeito mais simples é instalar o [GitHub CLI](https://cli.github.com) e rodar, uma vez:
 
-```bash
-gh auth login
-```
+O repositório é público: não precisa de convite nem de conta no GitHub para instalar.
 
-```bash
-gh auth setup-git
-```
-
-Se você já usa `git clone` em repositórios privados da Besco sem digitar senha, pode pular este passo.
+Os temas só aparecem nas sessões do Claude Code (a aba Code do Claude Desktop). O chat normal do Claude não carrega plugins.
 
 ## Instalar
 
@@ -121,7 +113,7 @@ As prévias de cada cena estão na pasta [`previas/`](previas/).
 
 **A animação está parada.** Se o computador está com "Reduzir movimento" ligado nas opções de acessibilidade, o app mostra a cena parada de propósito.
 
-**`Marketplace file not found` ou erro de acesso na instalação.** Confira se você aceitou o convite do repositório e se rodou `gh auth login` e `gh auth setup-git`.
+**`Marketplace file not found` ou erro na instalação.** Confira se digitou `besco-ai/besco-temas` certinho e se o computador tem o `git` instalado (no Mac, `xcode-select --install` instala).
 
 ## Atualizar e desinstalar
 
@@ -140,7 +132,7 @@ Para isso você precisa de uma cópia do repositório e de Python 3 com Pillow e
 1. Clone o repositório:
 
 ```bash
-gh repo clone besco-ai/besco-temas
+git clone https://github.com/besco-ai/besco-temas.git
 ```
 
 2. Coloque as fotos em `fotos/` e crie `fotos/zoeira.json`:
